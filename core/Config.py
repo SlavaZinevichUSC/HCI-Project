@@ -10,10 +10,10 @@ class Config:
     pooling_num_acoustic: int = 2
     lossFn: str = 'ce'  # only cross entropy is available
     optimizer: str = 'adam'  # only one option because lets be honest adam is all thats used
-    optimizer_lr: float = 0.001
+    optimizer_lr: float = 0.005
     bias_lr: float = 0.0005
     epochs: int = 100
-    batch_size: int = 50
+    batch_size: int = 100
     size_visual: int = 2048  # can probably make these dynamic but who gives a damn
     size_lexical: int = 768
     size_acoustic: int = 128
@@ -33,7 +33,7 @@ class Config:
     display_error: bool = True
     train_display_interval: int = 20
     classes_disc: int = 2
-    adapter: str = 'embed_acoustic'  # if multi don't forget to change 'modality'. its bad programming but oh well
+    adapter: str = 'basic_acoustic'  # if multi don't forget to change 'modality'. its bad programming but oh well
     # modes: 'basic_multimodal','acoustic_bias','visual_bias','multi_bias',
     # 'basic_acoustic', 'basic_visual'
     # 'embed_acoustic', 'embed_visual'

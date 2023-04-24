@@ -1,3 +1,4 @@
+from model.adapters.adapterBase import AdapterBase
 from model.tools.Storage import Storage
 from model.tools.Datapoint import Datapoint
 from core.Config import config
@@ -8,7 +9,7 @@ from model.tools.Factories import GetAdapter
 class Engine:
     def __init__(self, storage: Storage):
         self.storage = storage
-        self.modelAdapter: BasicAdapter = GetAdapter()
+        self.modelAdapter: AdapterBase = GetAdapter()
         self.epochs = config.epochs
 
 
@@ -21,6 +22,7 @@ class Engine:
                 out = self.modelAdapter.Run(datapoint)
                 self.modelAdapter.ApplyLoss(out, datapoint)
                 errorCollector.AddError(out, datapoint.labels)
+            self.modelAdapter.BatchApplyLoss()
             errorCollector.Archive()
             if config.display_error and i % config.train_display_interval == 0:
                 errorCollector.DisplayCurrentError(i)
@@ -46,8 +48,7 @@ class Engine:
         bestOption = {}
         for option in options:
             config.Replace(option)
-            self.modelAdapter = BasicAdapter()
-            self.optimizer = EngineTools.GetOptimizer(self.modelAdapter.GetParameters())
+            self.modelAdapter = GetAdapter()
             self.Run()
             error = self.EvaluateModel()
             print(f'error for options: {option} is: {error}')

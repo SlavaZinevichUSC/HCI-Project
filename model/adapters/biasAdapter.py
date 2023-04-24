@@ -27,6 +27,10 @@ class BiasAdapter(AdapterBase):  # Ended up unnecessary as all networks have the
         self.adv_optimizer = EngineTools.GetOptimizer(self.advNet.parameters())
         self.bias_optimizer = EngineTools.GetOptimizer(self.biasNet.parameters())
         self.GetInput = self.DefineGetInput(modality)
+        self.t_loss = 'temporalLoss'
+        self.a_loss = 'advLoss'
+        self.b_loss = 'biasLoss'
+        self.AddMultiLossType([self.t_loss, self.a_loss, self.b_loss])
 
     def DefineGetInput(self, modality):
         def acoustic(dataPoint: Datapoint):
@@ -47,13 +51,9 @@ class BiasAdapter(AdapterBase):  # Ended up unnecessary as all networks have the
 
     def ApplyLoss(self, results: ModelResults, datapoint: Datapoint):
         loss = self.GetLoss(results, datapoint)
-        torch.autograd.backward(loss)
-        self.temporal_optimizer.step()
-        self.temporal_optimizer.zero_grad()
-        self.bias_optimizer.step()
-        self.bias_optimizer.zero_grad()
-        self.adv_optimizer.step()
-        self.adv_optimizer.zero_grad()
+        self.AddLoss(self.t_loss, loss[0])
+        self.AddLoss(self.b_loss, loss[1])
+        self.AddLoss(self.a_loss, loss[2])
 
     def GetLoss(self, results: ModelResults, datapoint: Datapoint):
         temporalLoss = self.loss_fn(results.result, datapoint.labels)

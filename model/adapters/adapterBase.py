@@ -13,8 +13,15 @@ class AdapterBase():
     def AddOptimizer(self, opt : torch.optim.Optimizer):
         self.optimizers.append(opt)
 
-    def AddLoss(self, lossName):
+    def AddLossType(self, lossName : str):
         self.loss[lossName] = []
+
+    def AddMultiLossType(self, lossNames: [str]):
+        for name in lossNames:
+            self.AddLossType(name)
+
+    def AddLoss(self, lossName, loss):
+        self.loss[lossName].append(loss)
 
     def Run(self, datapoint: Datapoint) -> ModelResults:
         return ModelResults.Empty()
@@ -22,12 +29,13 @@ class AdapterBase():
     def ApplyLoss(self, results : ModelResults, datapoint: Datapoint):
         pass
 
-    def BaseApplyLoss(self):
+    def BatchApplyLoss(self):
         losses = [sum(loss) / len(loss) for loss in self.loss.values()]
+        for k,v in self.loss.items():
+            self.loss[k] = []
         torch.autograd.backward(losses)
         for opt in self.optimizers:
             opt.step()
             opt.zero_grad()
-
 
 

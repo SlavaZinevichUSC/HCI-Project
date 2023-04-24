@@ -23,7 +23,10 @@ class ModalEmbedAdapter(AdapterBase):  # Ended up unnecessary as all networks ha
         self.loss_fn = EngineTools.GetLoss()
         label_parameters = [self.biasNet.parameters(), self.temporalNet.parameters()]
         self.temporal_optimizer = EngineTools.GetOptimizer(chain(*label_parameters))
+        self.t_loss = 'loss'
         self.GetInput = self.DefineGetInput(modality)
+        self.AddLossType(self.t_loss)
+        self.AddOptimizer(self.temporal_optimizer)
 
     def DefineGetInput(self, modality):
         def acoustic(dataPoint: Datapoint):
@@ -43,9 +46,7 @@ class ModalEmbedAdapter(AdapterBase):  # Ended up unnecessary as all networks ha
 
     def ApplyLoss(self, results: ModelResults, datapoint: Datapoint):
         temporalLoss = self.loss_fn(results.result, datapoint.labels)
-        temporalLoss.backward()
-        self.temporal_optimizer.step()
-        self.temporal_optimizer.zero_grad()
+        self.AddLoss(self.t_loss, temporalLoss)
 
     @staticmethod
     def CreateModalAdapter(modality='acoustic'):
