@@ -4,14 +4,12 @@ from dataclasses import dataclass
 
 @dataclass()
 class EntryMeta:
-    filename : str
+    filename: str
     speakers: str
     visual: str
-    acoustic : str
+    acoustic: str
     lexical: str
     labels: int
-
-
 
 
 class Metadata():
@@ -26,4 +24,3 @@ class Metadata():
 
     def GetAllEntries(self) -> list[EntryMeta]:
         return self.df.apply(lambda row: EntryMeta(*row.to_list()), axis=1).tolist()
-

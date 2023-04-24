@@ -7,6 +7,10 @@ def GetLoss() -> nn.modules.loss:
     return lossFns.get(config.lossFn, nn.CrossEntropyLoss)()
 
 
-def GetOptimizer(parameters) -> optim.Optimizer:
+def GetOptimizer(parameters, lr = None) -> optim.Optimizer:
+    if lr is None:
+        lr = config.optimizer_lr
     opts = {'none': optim.Adam, 'adam': optim.Adam}
-    return opts.get(config.optimizer, optim.Adam)(parameters, lr = config.optimizer_lr)
+    opt = opts.get(config.optimizer, optim.Adam)(parameters, lr = lr)
+    opt.zero_grad()
+    return opt

@@ -2,6 +2,8 @@ import torch
 from core.Config import config
 from sklearn.metrics import f1_score
 
+from model.tools.modelResults import ModelResults
+
 
 class ErrorCollector:
     def __init__(self):
@@ -13,8 +15,8 @@ class ErrorCollector:
         self.singleRunPred = []
         self.singleRunLabel = []
 
-    def AddError(self, pred, label):
-        predLabel, actualLabel = torch.argmax(pred), torch.argmax(label)
+    def AddError(self, pred : ModelResults, label):
+        predLabel, actualLabel = torch.argmax(pred.result), torch.argmax(label)
         self.currentError += 1 if predLabel != actualLabel else 0
         self.count += 1
         self.singleRunPred.append(predLabel)
