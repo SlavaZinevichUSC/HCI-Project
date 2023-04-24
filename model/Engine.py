@@ -1,36 +1,16 @@
-from model.adapters.biasAdapter import BiasAdapter
-from model.adapters.combineAdapter import CombineAdapter
 from model.tools.Storage import Storage
 from model.tools.Datapoint import Datapoint
 from core.Config import config
 from model.tools import EngineTools, ErrorCollector, ConfusionCollector
 from model.adapters.basicAdapter import BasicAdapter
-
+from model.tools.Factories import GetAdapter
 
 class Engine:
     def __init__(self, storage: Storage):
         self.storage = storage
-        self.modelAdapter: BasicAdapter = self.GetAdapter()
+        self.modelAdapter: BasicAdapter = GetAdapter()
         self.epochs = config.epochs
 
-    def GetAdapter(self):
-        adapterName = config.adapter
-
-        def acousticBias():
-            return BiasAdapter.CreateModalAdapter('acoustic')
-
-        def visualBias():
-            return BiasAdapter.CreateModalAdapter('visual')
-
-        adapterSource = {'basic_multimodal': BasicAdapter,
-                         'acoustic_bias': acousticBias,
-                         'visual_bias': visualBias,
-                         'multi_bias': CombineAdapter}
-        if adapterName not in adapterSource.keys():
-            print('WARNING: adapter name not found in adapters, returning basic')
-            return BasicAdapter()
-        adapter = adapterSource.get(adapterName, BasicAdapter)
-        return adapter()
 
     def Run(self):
         errorCollector = ErrorCollector.ErrorCollector()
@@ -42,8 +22,9 @@ class Engine:
                 self.modelAdapter.ApplyLoss(out, datapoint)
                 errorCollector.AddError(out, datapoint.labels)
             errorCollector.Archive()
-            if config.display_error and i % 5 == 0:
+            if config.display_error and i % config.train_display_interval == 0:
                 errorCollector.DisplayCurrentError(i)
+        errorCollector.DisplayCurrentError(self.epochs)
 
     def EvaluateModel(self):
         datapoints = self.storage.GetAll()
@@ -52,7 +33,7 @@ class Engine:
         for datapoint in datapoints:
             out = self.modelAdapter.Run(datapoint)
             errorCollector.AddError(out, datapoint.labels)
-            confusion.Add(datapoint, out)
+            confusion.Add(datapoint, out.result)
         errorCollector.Archive()
         if config.display_error:
             errorCollector.DisplayCurrentError()

@@ -16,4 +16,18 @@ def RunBasic():
     engine = Engine(storage)
     engine.Run()
 
-RunBias()
+def RunTrial(delta):
+    meta = Metadata('./data/iemocap_embed')
+    storage = Storage.LazyStorage(meta)
+    for d in delta:
+        config.Replace(d)
+        engine = Engine(storage)
+        engine.Run()
+        engine.EvaluateModel()
+
+delta = [{'adapter': 'embed_acoustic'},
+         {'adapter': 'acoustic_bias', 'bias_weight': 0.0},
+         {'adapter': 'acoustic_bias', 'bias_weight': 0.02},
+         {'adapter': 'acoustic_bias', 'bias_weight': 0.05},
+         {'adapter': 'acoustic_bias', 'bias_weight': 0.1}]
+RunTrial(delta)

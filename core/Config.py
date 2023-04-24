@@ -13,7 +13,7 @@ class Config:
     optimizer_lr: float = 0.001
     bias_lr: float = 0.0005
     epochs: int = 100
-    batch_size: int = 100
+    batch_size: int = 50
     size_visual: int = 2048  # can probably make these dynamic but who gives a damn
     size_lexical: int = 768
     size_acoustic: int = 128
@@ -31,10 +31,13 @@ class Config:
     modality: str = 'multi'  # options are multi, visual, acoustic, lexical
     display_confusion: bool = True
     display_error: bool = True
+    train_display_interval: int = 20
     classes_disc: int = 2
-    adapter: str = 'acoustic_bias'  # if multi don't forget to change 'modality'. its bad programming but oh well
-    # 'basic_multimodal','acoustic_bias','visual_bias','multi_bias'
-    bias_weight: float = 0.1  # technically should normalize
+    adapter: str = 'embed_acoustic'  # if multi don't forget to change 'modality'. its bad programming but oh well
+    # modes: 'basic_multimodal','acoustic_bias','visual_bias','multi_bias',
+    # 'basic_acoustic', 'basic_visual'
+    # 'embed_acoustic', 'embed_visual'
+    bias_weight: float = 0  # technically should normalize
 
     def Display(self):
         pprint.pprint(self)

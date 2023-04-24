@@ -21,7 +21,7 @@ class CombineAdapter(AdapterBase):
         acoustic = self.acousticAdapter.Run(datapoint)
         visual = self.visualAdapter.Run(datapoint)
         results = acoustic.result * self.weight_visual + visual.result * self.weigh_acoustic
-        return ModelResults(results, [acoustic.advResult, visual.advResult])
+        return ModelResults(results, [acoustic.FirstAdvResult(), visual.FirstAdvResult()])
         pass
 
     # relying on correct ordering between run and apply loss for adversarial data
@@ -29,3 +29,6 @@ class CombineAdapter(AdapterBase):
         lossA = self.acousticAdapter.GetLoss(ModelResults(results.result, [results.advResult[0]]), datapoint)
         lossV = self.visualAdapter.GetLoss(ModelResults(results.result, [results.advResult[1]]), datapoint)
         torch.autograd.backward(lossA + lossV)
+        self.acousticAdapter.StepOptimizer()
+        self.visualAdapter.StepOptimizer()
+

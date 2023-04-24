@@ -15,17 +15,14 @@ from itertools import chain
 from model.tools.modelResults import ModelResults
 
 
-class BiasAdapter(AdapterBase):  # Ended up unnecessary as all networks have the same API
+class ModalEmbedAdapter(AdapterBase):  # Ended up unnecessary as all networks have the same API
     def __init__(self, size_in, modality: str | None = None):
-        super(BiasAdapter, self).__init__()
+        super(ModalEmbedAdapter, self).__init__()
         self.biasNet = BiasMitigationNet(size_in, c.size_hidden, size_in)
-        self.advNet = DiscriminatorNet(size_in, c.size_hidden, c.classes_disc)
         self.temporalNet = TemporalNet(size_in, c.size_hidden, c.gru_num_layers, c.num_labels)
         self.loss_fn = EngineTools.GetLoss()
-        #label_parameters = [self.biasNet.parameters(), self.temporalNet.parameters()]
-        self.temporal_optimizer = EngineTools.GetOptimizer(self.temporalNet.parameters())
-        self.adv_optimizer = EngineTools.GetOptimizer(self.advNet.parameters())
-        self.bias_optimizer = EngineTools.GetOptimizer(self.biasNet.parameters())
+        label_parameters = [self.biasNet.parameters(), self.temporalNet.parameters()]
+        self.temporal_optimizer = EngineTools.GetOptimizer(chain(*label_parameters))
         self.GetInput = self.DefineGetInput(modality)
 
     def DefineGetInput(self, modality):
@@ -42,37 +39,16 @@ class BiasAdapter(AdapterBase):  # Ended up unnecessary as all networks have the
     def Run(self, datapoint: Datapoint) -> ModelResults:
         embed = self.biasNet(self.GetInput(datapoint))
         temporal = self.temporalNet(embed)
-        adv = self.advNet(embed.detach())
-        return ModelResults(temporal, [adv])
+        return ModelResults(temporal)
 
     def ApplyLoss(self, results: ModelResults, datapoint: Datapoint):
-        loss = self.GetLoss(results, datapoint)
-        torch.autograd.backward(loss)
-        self.temporal_optimizer.step()
-        self.temporal_optimizer.zero_grad()
-        self.bias_optimizer.step()
-        self.bias_optimizer.zero_grad()
-        self.adv_optimizer.step()
-        self.adv_optimizer.zero_grad()
-
-    def GetLoss(self, results: ModelResults, datapoint: Datapoint):
         temporalLoss = self.loss_fn(results.result, datapoint.labels)
-        advResult = results.FirstAdvResult()
-        biasVar = datapoint.GenderLike(advResult)
-        advLoss = self.loss_fn(advResult, biasVar)
-        biasLoss = temporalLoss - c.bias_weight * advLoss
-        return [temporalLoss, biasLoss, advLoss]
-
-    def StepOptimizer(self):
-        self.adv_optimizer.step()
-        self.adv_optimizer.zero_grad()
+        temporalLoss.backward()
         self.temporal_optimizer.step()
         self.temporal_optimizer.zero_grad()
-        self.bias_optimizer.step()
-        self.bias_optimizer.zero_grad()
 
     @staticmethod
     def CreateModalAdapter(modality='acoustic'):
         if 'acoustic' in modality:
-            return BiasAdapter(c.size_acoustic, 'acoustic')
-        return BiasAdapter(c.size_visual, 'visual')
+            return ModalEmbedAdapter(c.size_acoustic, 'acoustic')
+        return ModalEmbedAdapter(c.size_visual, 'visual')
