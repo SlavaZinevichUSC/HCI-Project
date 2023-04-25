@@ -18,11 +18,12 @@ from model.tools.modelResults import ModelResults
 class ModalEmbedAdapter(AdapterBase):  # Ended up unnecessary as all networks have the same API
     def __init__(self, size_in, modality: str | None = None):
         super(ModalEmbedAdapter, self).__init__()
-        self.biasNet = BiasMitigationNet(size_in, c.size_hidden, size_in)
+        self.biasNet = BiasMitigationNet(size_in, c.size_embed_hidden, size_in)
         self.temporalNet = TemporalNet(size_in, c.size_hidden, c.gru_num_layers, c.num_labels)
         self.loss_fn = EngineTools.GetLoss()
-        label_parameters = [self.biasNet.parameters(), self.temporalNet.parameters()]
-        self.temporal_optimizer = EngineTools.GetOptimizer(chain(*label_parameters))
+        #label_parameters = [self.biasNet.parameters(), self.temporalNet.parameters()]
+        self.net = torch.nn.Sequential(self.biasNet, self.temporalNet)
+        self.temporal_optimizer = EngineTools.GetOptimizer(self.net.parameters())
         self.t_loss = 'loss'
         self.GetInput = self.DefineGetInput(modality)
         self.AddLossType(self.t_loss)
@@ -40,8 +41,9 @@ class ModalEmbedAdapter(AdapterBase):  # Ended up unnecessary as all networks ha
         return acoustic
 
     def Run(self, datapoint: Datapoint) -> ModelResults:
-        embed = self.biasNet(self.GetInput(datapoint))
-        temporal = self.temporalNet(embed)
+        #embed = self.biasNet(self.GetInput(datapoint))
+        #temporal = self.temporalNet(embed)
+        temporal = self.net(self.GetInput(datapoint))
         return ModelResults(temporal)
 
     def ApplyLoss(self, results: ModelResults, datapoint: Datapoint):

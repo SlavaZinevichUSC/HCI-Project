@@ -1,5 +1,5 @@
 from core.Config import config
-from core.Metadata import EntryMeta
+from core.Metadata import IemoEntryMeta
 import numpy as np
 from skimage.measure import block_reduce
 from model.tools.Datapoint import Datapoint
@@ -23,7 +23,7 @@ def Pool(poolType, poolNum):  # Fake Factory
     return methods.get(poolType, No)
 
 
-def Standardize(data: EntryMeta, metaPath):
+def Standardize(data: IemoEntryMeta, metaPath):
     def load(path):
         url = metaPath + path
         return np.load(url)

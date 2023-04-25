@@ -32,6 +32,7 @@ def GetAdapter():
                      'visual_bias': visualBias,
                      'basic_acoustic': acousticBasic,
                      'basic_visual': visualBasic,
+                     'multi_basic': CombineAdapter,
                      'multi_bias': CombineAdapter,
                      'embed_acoustic': acousticEmbed,
                      'embed_visual': visualEmbed}

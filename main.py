@@ -38,4 +38,7 @@ delta = [{'adapter': 'basic_acoustic'},
          {'adapter': 'acoustic_bias', 'bias_weight': 0.05},
          {'adapter': 'acoustic_bias', 'bias_weight': 0.1}]
 # RunTrial(delta)
+delta = [{'adapter': 'basic_acoustic'},
+         {'adapter': 'basic_visual'},
+         {'adapter': 'multi_basic'}]
 RunTrial(delta)

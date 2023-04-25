@@ -25,6 +25,8 @@ class SingleClassConfusion:
                 self.trueNeg += 1
 
     def DisplayConfusion(self):
+        if not config.display_confusion:
+            return
         print(f'Confusion matrix for label {self.label} aka {labelNames[self.label]}:')
         print(f'---------------------------------------------------')
         print('             actual positive | actual negative')

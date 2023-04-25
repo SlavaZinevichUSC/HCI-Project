@@ -18,7 +18,7 @@ from model.tools.modelResults import ModelResults
 class BiasAdapter(AdapterBase):  # Ended up unnecessary as all networks have the same API
     def __init__(self, size_in, modality: str | None = None):
         super(BiasAdapter, self).__init__()
-        self.biasNet = BiasMitigationNet(size_in, c.size_hidden, size_in)
+        self.biasNet = BiasMitigationNet(size_in, c.size_embed_hidden, size_in)
         self.advNet = DiscriminatorNet(size_in, c.size_hidden, c.classes_disc)
         self.temporalNet = TemporalNet(size_in, c.size_hidden, c.gru_num_layers, c.num_labels)
         self.loss_fn = EngineTools.GetLoss()

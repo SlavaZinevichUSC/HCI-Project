@@ -37,6 +37,9 @@ class Datapoint:
             self.gender = femaleTensor if 'F' in self.speakers else maleTensor
         return self.gender
 
+    def GenderAsString(self) -> str:
+        return 'F' if 'F' in self.speakers else 'M'
+
     def GenderLike(self, t: torch.Tensor) -> torch.Tensor:
         gender = self.Gender()
         return gender.unsqueeze(0).repeat(t.size()[0],1)

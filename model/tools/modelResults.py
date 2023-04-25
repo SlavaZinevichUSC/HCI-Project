@@ -8,6 +8,8 @@ class ModelResults:
         self.advResult: [Tensor] | None = advResult
 
     def FirstAdvResult(self):
+        if self.advResult is None:
+            return None
         return self.advResult[0]
 
     @staticmethod

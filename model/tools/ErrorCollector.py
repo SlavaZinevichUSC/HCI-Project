@@ -3,6 +3,7 @@ from core.Config import config
 from sklearn.metrics import f1_score
 
 from model.tools.modelResults import ModelResults
+from model.tools.plotter import Plotter
 
 
 class ErrorCollector:
@@ -14,6 +15,7 @@ class ErrorCollector:
         self.rollingNum = config.rolling_num
         self.singleRunPred = []
         self.singleRunLabel = []
+        self.Plotter = Plotter()
 
     def AddError(self, pred : ModelResults, label):
         predLabel, actualLabel = torch.argmax(pred.result), torch.argmax(label)
@@ -24,6 +26,9 @@ class ErrorCollector:
 
     def GetError(self):
         return self.currentError / self.count
+
+    def DisplayErrorGraph(self):
+        self.Plotter.PlotEnumerated(self.errors)
 
     def Archive(self):
         err = self.GetError()
@@ -41,6 +46,8 @@ class ErrorCollector:
         return sum(self.errors[-self.rollingNum-1:-1]) / self.rollingNum
 
     def DisplayCurrentError(self, epoch=-1):
+        if not config.display_error:
+            return
         if len(self.errors) < 1:
             print(f'There Are No Errors Recorded!')
             return

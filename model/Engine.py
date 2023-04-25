@@ -1,4 +1,5 @@
 from model.adapters.adapterBase import AdapterBase
+from model.tools.BiasCollector import BiasCollector
 from model.tools.Storage import Storage
 from model.tools.Datapoint import Datapoint
 from core.Config import config
@@ -27,16 +28,20 @@ class Engine:
             if config.display_error and i % config.train_display_interval == 0:
                 errorCollector.DisplayCurrentError(i)
         errorCollector.DisplayCurrentError(self.epochs)
+        errorCollector.DisplayErrorGraph()
 
     def EvaluateModel(self):
         datapoints = self.storage.GetAll()
         errorCollector = ErrorCollector.ErrorCollector()
         confusion = ConfusionCollector.ConfusionCollector()
+        biasCollector = BiasCollector()
         for datapoint in datapoints:
             out = self.modelAdapter.Run(datapoint)
             errorCollector.AddError(out, datapoint.labels)
             confusion.Add(datapoint, out.result)
+            biasCollector.AddResult(out.result, datapoint.GenderAsString())
         errorCollector.Archive()
+        biasCollector.PrintResults()
         if config.display_error:
             errorCollector.DisplayCurrentError()
         if config.display_confusion:

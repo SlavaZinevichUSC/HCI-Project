@@ -2,6 +2,7 @@ import torch
 
 from model.adapters.adapterBase import AdapterBase
 from model.adapters.biasAdapter import BiasAdapter
+from model.adapters.modalAdapter import ModalAdapter
 from model.tools.Datapoint import Datapoint
 from model.tools.modelResults import ModelResults
 from core.Config import config
@@ -9,8 +10,10 @@ from core.Config import config
 
 class CombineAdapter(AdapterBase):
     def __init__(self):
-        self.acousticAdapter = BiasAdapter.CreateModalAdapter('acoustic')
-        self.visualAdapter = BiasAdapter.CreateModalAdapter('visual')
+        super(CombineAdapter, self).__init__()
+        adapter = BiasAdapter if 'bias' in config.adapter else ModalAdapter
+        self.acousticAdapter = adapter.CreateModalAdapter('acoustic')
+        self.visualAdapter = adapter.CreateModalAdapter('visual')
         weight_visual = config.late_weighted_visual
         weight_acoustic = config.late_weighted_acoustic
         combined = weight_acoustic + weight_visual
@@ -22,13 +25,9 @@ class CombineAdapter(AdapterBase):
         visual = self.visualAdapter.Run(datapoint)
         results = acoustic.result * self.weight_visual + visual.result * self.weigh_acoustic
         return ModelResults(results, [acoustic.FirstAdvResult(), visual.FirstAdvResult()])
-        pass
 
     # relying on correct ordering between run and apply loss for adversarial data
     def ApplyLoss(self, results: ModelResults, datapoint: Datapoint):
-        lossA = self.acousticAdapter.GetLoss(ModelResults(results.result, [results.advResult[0]]), datapoint)
-        lossV = self.visualAdapter.GetLoss(ModelResults(results.result, [results.advResult[1]]), datapoint)
-        torch.autograd.backward(lossA + lossV)
-        self.acousticAdapter.StepOptimizer()
-        self.visualAdapter.StepOptimizer()
+        self.acousticAdapter.ApplyLoss(results, datapoint)
+        self.visualAdapter.ApplyLoss(results, datapoint)
 
