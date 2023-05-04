@@ -12,9 +12,10 @@ class TemporalNet(nn.Module):
         self.temporal = nn.GRU(input_dim, hidden_dim, n_layers, dropout=dropout_prob)
         self.out = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, output_dim),
                                  nn.Softmax(dim=0))
+        self.initial = self.init_hidden()
 
     def forward(self, x):
-        gru, h = self.temporal(x, self.init_hidden())
+        gru, h = self.temporal(x, self.initial)
         return self.out(gru[-1, :])
 
     def init_hidden(self):

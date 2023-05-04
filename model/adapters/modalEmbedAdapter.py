@@ -21,7 +21,6 @@ class ModalEmbedAdapter(AdapterBase):  # Ended up unnecessary as all networks ha
         self.biasNet = BiasMitigationNet(size_in, c.size_embed_hidden, size_in)
         self.temporalNet = TemporalNet(size_in, c.size_hidden, c.gru_num_layers, c.num_labels)
         self.loss_fn = EngineTools.GetLoss()
-        #label_parameters = [self.biasNet.parameters(), self.temporalNet.parameters()]
         self.net = torch.nn.Sequential(self.biasNet, self.temporalNet)
         self.temporal_optimizer = EngineTools.GetOptimizer(self.net.parameters())
         self.t_loss = 'loss'

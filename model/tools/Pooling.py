@@ -1,10 +1,9 @@
 from core.Config import config
-from core.Metadata import IemoEntryMeta
+from core.Metadata import IemoEntryMeta, SewaEntryMeta
 import numpy as np
 from skimage.measure import block_reduce
 from model.tools.Datapoint import Datapoint
 import torch
-
 
 def Pool(poolType, poolNum):  # Fake Factory
     def No(vData):
@@ -23,14 +22,20 @@ def Pool(poolType, poolNum):  # Fake Factory
     return methods.get(poolType, No)
 
 
-def Standardize(data: IemoEntryMeta, metaPath):
+def Standardize(data, metaPath):
+    if config.test_set == 'sewa':
+        return StandardizeSewa(data, metaPath)
+    return StandardizeIemocap(data, metaPath)
+
+
+def StandardizeIemocap(data: IemoEntryMeta, metaPath):
     def load(path):
         url = metaPath + path
         return np.load(url)
 
-    def toTorch(item, modality): #Very ugly
+    def toTorch(item, modality):  # Very ugly
         res = torch.from_numpy(item).double()
-        #if config.modality != modality and config.modality != 'multi':
+        # if config.modality != modality and config.modality != 'multi':
         #    res = torch.zeros_like(res)
         return res
 
@@ -42,3 +47,30 @@ def Standardize(data: IemoEntryMeta, metaPath):
     lexical = toTorch(load(data.lexical), 'lexical')
     label = LabelAsTensor(data.labels)
     return Datapoint(data.filename, data.speakers, visual, audio, lexical, label)
+
+
+def StandardizeSewa(data: SewaEntryMeta, metaPath):
+    def load(path) -> torch.Tensor:
+        url = metaPath + '/' + path
+        return torch.load(url).double()
+
+    #visual = load(data.video)
+    visual = None
+    audio = load(data.audio)
+    label = SewaGenerateLabels(data)
+    lexical = torch.empty(1)
+
+    return Datapoint(data.ethnicity, data.ethnicity, visual, audio, lexical, label)
+
+
+def SewaGenerateLabels(data: SewaEntryMeta):
+    n_labels = 3
+
+    def LabelAsTensor(label):
+        return torch.nn.functional.one_hot(torch.tensor([label]), num_classes=n_labels)[0, :].float()
+
+    if data.good <=-3:
+        return LabelAsTensor(0)
+    elif data.good <=2:
+        return LabelAsTensor(1)
+    return LabelAsTensor(2)

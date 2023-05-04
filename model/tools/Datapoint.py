@@ -3,7 +3,13 @@ import torch
 from core.Config import config
 
 femaleTensor = torch.FloatTensor([1, 0])
-maleTensor = torch.FloatTensor([0,1])
+maleTensor = torch.FloatTensor([0, 1])
+races = {'british': torch.FloatTensor([1, 0, 0, 0, 0, 0]),
+         'chinese': torch.FloatTensor([0, 1, 0, 0, 0, 0]),
+         'german': torch.FloatTensor([0, 0, 1, 0, 0, 0]),
+         'greek': torch.FloatTensor([0, 0, 0, 1, 0, 0]),
+         'hungarian': torch.FloatTensor([0, 0, 0, 0, 1, 0]),
+         'serbian': torch.FloatTensor([0, 0, 0, 0, 0, 1])}
 
 
 @dataclass()
@@ -13,8 +19,9 @@ class Datapoint:
     visual: torch.Tensor
     acoustic: torch.Tensor
     lexical: torch.Tensor
-    labels: int
+    labels: torch.Tensor
     gender: torch.Tensor | None = None
+    race: torch.Tensor | None = None
 
     # Hideous solution to avoid reloading and instead dynamically adujsting to modality
     def GetVisual(self):
@@ -32,6 +39,32 @@ class Datapoint:
             return torch.zeros_like(self.lexical)
         return self.lexical
 
+    def GetBiasLabel(self):
+        if config.test_set == 'iemocap':
+            return self.Gender()
+        return self.GetRace()
+
+    def GetBiasLabelString(self) -> str:
+        if config.test_set == 'iemocap':
+            return self.GenderAsString()
+        return self.GetRaceAsString()
+
+    def BiasLike(self, t: torch.Tensor):
+        if config.test_set == 'iemocap':
+            return self.GenderLike(t)
+        return
+
+    def GetRace(self):
+        if self.race is not None:
+            return self.race
+        self.race = races[self.speakers]  # based on number of sewa races
+
+    def GetRaceAsString(self):
+        return self.speakers
+
+    def GetRaceLike(self, t: torch.Tensor):
+        return self.GetRace().unsqueeze(0).repeat(t.size()[0], 1)
+
     def Gender(self) -> torch.Tensor:
         if self.gender is None:
             self.gender = femaleTensor if 'F' in self.speakers else maleTensor
@@ -42,4 +75,4 @@ class Datapoint:
 
     def GenderLike(self, t: torch.Tensor) -> torch.Tensor:
         gender = self.Gender()
-        return gender.unsqueeze(0).repeat(t.size()[0],1)
+        return gender.unsqueeze(0).repeat(t.size()[0], 1)

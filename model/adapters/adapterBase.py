@@ -34,8 +34,12 @@ class AdapterBase():
         for k,v in self.loss.items():
             self.loss[k] = []
         torch.autograd.backward(losses)
+        self.StepOptimizer()
         for opt in self.optimizers:
             opt.step()
             opt.zero_grad()
+
+    def StepOptimizer(self):
+        pass
 
 

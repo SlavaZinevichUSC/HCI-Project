@@ -1,5 +1,7 @@
 from core.Config import config
 from torch import argmax
+from model.tools.Writer import WriteToFile
+from model.tools.Datapoint import Datapoint
 
 
 class BiasData:
@@ -12,21 +14,10 @@ class BiasData:
 
 class BiasCollector:
     def __init__(self):
-        self.biases = {}
-        self.InitializeBiases()
+        self.data = []
 
-    def InitializeBiases(self):
-        if config.testing_bias == 'gender':
-            self.biases['M'] = BiasData()
-            self.biases['F'] = BiasData()
-
-    def AddResult(self, result, bias):
-        self.biases[bias].AddTensorResult(result)
+    def AddResult(self, result, datapoint: Datapoint):
+        self.data.append([int(argmax(result)), int(argmax(datapoint.labels)), datapoint.GetBiasLabelString()])
 
     def PrintResults(self):
-        if not config.display_bias:
-            return
-        print(f'TESTED: {config.test_set} on mode: {config.adapter}')
-        for k,v in self.biases.items():
-            print(f'bias name {k}: {v.counter}')
-
+        WriteToFile(self.data, config.adapter + '.json')

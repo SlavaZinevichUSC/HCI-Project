@@ -28,7 +28,7 @@ class Engine:
             if config.display_error and i % config.train_display_interval == 0:
                 errorCollector.DisplayCurrentError(i)
         errorCollector.DisplayCurrentError(self.epochs)
-        errorCollector.DisplayErrorGraph()
+        #errorCollector.DisplayErrorGraph()
 
     def EvaluateModel(self):
         datapoints = self.storage.GetAll()
@@ -39,7 +39,7 @@ class Engine:
             out = self.modelAdapter.Run(datapoint)
             errorCollector.AddError(out, datapoint.labels)
             confusion.Add(datapoint, out.result)
-            biasCollector.AddResult(out.result, datapoint.GenderAsString())
+            biasCollector.AddResult(out.result, datapoint)
         errorCollector.Archive()
         biasCollector.PrintResults()
         if config.display_error:

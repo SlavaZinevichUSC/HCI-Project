@@ -34,8 +34,10 @@ def GetAdapter():
                      'basic_visual': visualBasic,
                      'multi_basic': CombineAdapter,
                      'multi_bias': CombineAdapter,
+                     'multi_embed': CombineAdapter,
                      'embed_acoustic': acousticEmbed,
-                     'embed_visual': visualEmbed}
+                     'embed_visual': visualEmbed,
+                     }
     if adapterName not in adapterSource.keys():
         print('WARNING: adapter name not found in adapters, returning basic')
         return BasicAdapter()
