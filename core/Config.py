@@ -7,12 +7,12 @@ class Config:
     visual_pooling: str = 'max'
     acoustic_pooling: str = 'mean'
     pooling_num_vis: int = 5
-    pooling_num_acoustic: int = 5
+    pooling_num_acoustic: int = 3
     lossFn: str = 'ce'  # only cross entropy is available
     optimizer: str = 'adam'  # only one option because let's be honest adam is all that's used
-    optimizer_lr: float = 0.005
-    epochs: int = 800
-    batch_size: int = 100
+    optimizer_lr: float = 0.01
+    epochs: int = 50
+    batch_size: int = 350
     size_visual: int = 2048  # can probably make these dynamic but who gives a damn
     size_lexical: int = 768
     size_acoustic: int = 128
@@ -32,15 +32,15 @@ class Config:
     display_error: bool = True
     display_bias: bool = True
     train_display_interval: int = 10
-    classes_disc: int = 2
     adapter: str = 'embed_acoustic'  # if multi don't forget to change 'modality'. its bad programming but oh well
     # modes: 'acoustic_bias','visual_bias','multi_bias'
     # 'basic_acoustic', 'basic_visual', 'multi_basic'
     # 'embed_acoustic', 'embed_visual', 'multi_embed'
-    bias_weight: float = 0.025  # technically should normalize
-    testing_bias: str = 'race'
-    test_set: str = 'sewa'
-    num_labels = 4 if test_set == 'iemocap' else 3 #Might be edited by SEWA label generator
+    bias_weight: float = 0.02  # technically should normalize
+    test_set: str = 'iemocap'
+    testing_bias: str = 'gender' if test_set == 'iemocap' else 'race'
+    num_labels = 4 if test_set == 'iemocap' else 2 #Might be edited by SEWA label generator
+    num_bias_labels = 2 if test_set == 'iemocap' else 6
     bias_print_method: str = 'json'
 
 

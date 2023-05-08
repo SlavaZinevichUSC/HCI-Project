@@ -5,6 +5,7 @@ from skimage.measure import block_reduce
 from model.tools.Datapoint import Datapoint
 import torch
 
+
 def Pool(poolType, poolNum):  # Fake Factory
     def No(vData):
         return vData
@@ -52,10 +53,10 @@ def StandardizeIemocap(data: IemoEntryMeta, metaPath):
 def StandardizeSewa(data: SewaEntryMeta, metaPath):
     def load(path) -> torch.Tensor:
         url = metaPath + '/' + path
-        return torch.load(url).double()
+        d = torch.load(url).double().squeeze()
+        return d.sub(128.0) / 128.0
 
-    #visual = load(data.video)
-    visual = None
+    visual = load(data.video)
     audio = load(data.audio)
     label = SewaGenerateLabels(data)
     lexical = torch.empty(1)
@@ -64,13 +65,11 @@ def StandardizeSewa(data: SewaEntryMeta, metaPath):
 
 
 def SewaGenerateLabels(data: SewaEntryMeta):
-    n_labels = 3
+    n_labels = 2
 
     def LabelAsTensor(label):
         return torch.nn.functional.one_hot(torch.tensor([label]), num_classes=n_labels)[0, :].float()
 
-    if data.good <=-3:
+    if data.good <= 0:
         return LabelAsTensor(0)
-    elif data.good <=2:
-        return LabelAsTensor(1)
-    return LabelAsTensor(2)
+    return LabelAsTensor(1)

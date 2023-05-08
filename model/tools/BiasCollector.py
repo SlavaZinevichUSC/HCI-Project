@@ -20,4 +20,4 @@ class BiasCollector:
         self.data.append([int(argmax(result)), int(argmax(datapoint.labels)), datapoint.GetBiasLabelString()])
 
     def PrintResults(self):
-        WriteToFile(self.data, config.adapter + '.json')
+        WriteToFile(self.data, config.adapter + '_' + config.test_set + '.json')

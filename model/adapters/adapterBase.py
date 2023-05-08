@@ -33,7 +33,7 @@ class AdapterBase():
         losses = [sum(loss) / len(loss) for loss in self.loss.values()]
         for k,v in self.loss.items():
             self.loss[k] = []
-        torch.autograd.backward(losses)
+        torch.autograd.backward(losses, retain_graph=True)
         self.StepOptimizer()
         for opt in self.optimizers:
             opt.step()

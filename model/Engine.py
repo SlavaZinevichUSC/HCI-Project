@@ -16,17 +16,17 @@ class Engine:
 
     def Run(self):
         errorCollector = ErrorCollector.ErrorCollector()
-        for i in range(self.epochs):
-            batch: list[Datapoint] = self.storage.GetRandomBatch(config.batch_size)
-
-            for datapoint in batch:
-                out = self.modelAdapter.Run(datapoint)
-                self.modelAdapter.ApplyLoss(out, datapoint)
-                errorCollector.AddError(out, datapoint.labels)
-            self.modelAdapter.BatchApplyLoss()
-            errorCollector.Archive()
-            if config.display_error and i % config.train_display_interval == 0:
-                errorCollector.DisplayCurrentError(i)
+        for j in range(10):
+            for i in range(self.epochs):
+                batch: list[Datapoint] = self.storage.GetRandomBatch(config.batch_size)
+                for datapoint in batch:
+                    out = self.modelAdapter.Run(datapoint)
+                    self.modelAdapter.ApplyLoss(out, datapoint)
+                    errorCollector.AddError(out, datapoint.labels)
+                self.modelAdapter.BatchApplyLoss()
+                errorCollector.Archive()
+                if config.display_error and i + j*50 % config.train_display_interval == 0:
+                    errorCollector.DisplayCurrentError(i+ j*50)
         errorCollector.DisplayCurrentError(self.epochs)
         #errorCollector.DisplayErrorGraph()
 

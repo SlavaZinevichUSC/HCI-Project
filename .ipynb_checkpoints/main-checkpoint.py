@@ -19,7 +19,7 @@ def RunBasic():
     engine.Run()
 
 
-def RunTrial(delta, path='./data/iemocap_embed', filename='/dataset.csv'):
+def RunTrial(delta, path = './data/iemocap_embed', filename = '/dataset.csv'):
     meta = Metadata(path, filename)
     storage = Storage.ActiveStorage(meta)
     for d in delta:
@@ -31,11 +31,14 @@ def RunTrial(delta, path='./data/iemocap_embed', filename='/dataset.csv'):
         engine.EvaluateModel()
 
 
+delta = [{'adapter': 'basic_acoustic'},
+         {'adapter': 'embed_acoustic'},
+         {'adapter': 'acoustic_bias', 'bias_weight': 0.0},
+         {'adapter': 'acoustic_bias', 'bias_weight': 0.02},
+         {'adapter': 'acoustic_bias', 'bias_weight': 0.05},
+         {'adapter': 'acoustic_bias', 'bias_weight': 0.1}]
 # RunTrial(delta)
-delta = [
-    {'adapter': 'multi_basic'},
-         {'adapter': 'multi_embed'},
-         {'adapter': 'multi_bias'},
-         ]
-#RunTrial(delta, './data/sewa_t', '/key.csv')
-RunTrial(delta)
+delta = [{'adapter': 'basic_acoustic'},
+         {'adapter': 'acoustic_bias'}]
+RunTrial(delta, './data/sewa_audio', '/key.csv')
+#RunTrial(delta)

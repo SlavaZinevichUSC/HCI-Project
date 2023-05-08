@@ -52,12 +52,13 @@ class Datapoint:
     def BiasLike(self, t: torch.Tensor):
         if config.test_set == 'iemocap':
             return self.GenderLike(t)
-        return
+        return self.GetRaceLike(t)
 
     def GetRace(self):
         if self.race is not None:
             return self.race
         self.race = races[self.speakers]  # based on number of sewa races
+        return self.race
 
     def GetRaceAsString(self):
         return self.speakers

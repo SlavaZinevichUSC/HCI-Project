@@ -11,7 +11,7 @@ class BasicAdapter:  # Ended up unnecessary as all networks have the same API
         self.model = self.GetNet()
         self.loss_fn = EngineTools.GetLoss()
         self.optimizer = EngineTools.GetOptimizer(self.model.parameters())
-        self.optimizer.zero_grad()
+        self
         pass
 
     def Run(self, datapoint: Datapoint) -> ModelResults:
