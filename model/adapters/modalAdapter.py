@@ -16,7 +16,7 @@ from model.tools.modelResults import ModelResults
 
 
 class ModalAdapter(AdapterBase):  # Ended up unnecessary as all networks have the same API
-    def __init__(self, size_in, modality: str | None = None):
+    def __init__(self, size_in, modality):
         super(ModalAdapter, self).__init__()
         self.temporalNet = TemporalNet(size_in, c.size_hidden, c.gru_num_layers, c.num_labels)
         self.loss_fn = EngineTools.GetLoss()

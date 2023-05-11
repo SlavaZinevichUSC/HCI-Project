@@ -39,7 +39,7 @@ def GetAdapter():
                      'embed_visual': visualEmbed,
                      }
     if adapterName not in adapterSource.keys():
-        print('WARNING: adapter name not found in adapters, returning basic')
-        return BasicAdapter()
+        print('WARNING: adapter name not found in adapters, returning combine adapter')
+        return CombineAdapter()
     adapter = adapterSource.get(adapterName, BasicAdapter)
     return adapter()

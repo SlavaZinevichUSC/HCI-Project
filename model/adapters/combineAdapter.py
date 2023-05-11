@@ -28,13 +28,14 @@ class CombineAdapter(AdapterBase):
     def Run(self, datapoint: Datapoint) -> ModelResults:
         acoustic = self.acousticAdapter.Run(datapoint)
         visual = self.visualAdapter.Run(datapoint)
+        self.acousticAdapter.ApplyLoss(acoustic, datapoint)
+        self.visualAdapter.ApplyLoss(visual, datapoint)
         results = acoustic.result * self.weight_visual + visual.result * self.weigh_acoustic
         return ModelResults(results, [acoustic.FirstAdvResult(), visual.FirstAdvResult()])
 
     # relying on correct ordering between run and apply loss for adversarial data
     def ApplyLoss(self, results: ModelResults, datapoint: Datapoint):
-        self.acousticAdapter.ApplyLoss(results, datapoint)
-        self.visualAdapter.ApplyLoss(results, datapoint)
+        pass
 
     def StepOptimizer(self):
         self.acousticAdapter.StepOptimizer()

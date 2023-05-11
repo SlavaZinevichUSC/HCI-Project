@@ -1,11 +1,13 @@
+from core.Metadata import Metadata
 from model.adapters.adapterBase import AdapterBase
 from model.tools.BiasCollector import BiasCollector
-from model.tools.Storage import Storage
+from model.tools.Storage import LazyStorage, Storage
 from model.tools.Datapoint import Datapoint
 from core.Config import config
 from model.tools import EngineTools, ErrorCollector, ConfusionCollector
 from model.adapters.basicAdapter import BasicAdapter
 from model.tools.Factories import GetAdapter
+
 
 class Engine:
     def __init__(self, storage: Storage):
@@ -13,22 +15,19 @@ class Engine:
         self.modelAdapter: AdapterBase = GetAdapter()
         self.epochs = config.epochs
 
-
     def Run(self):
         errorCollector = ErrorCollector.ErrorCollector()
-        for j in range(10):
-            for i in range(self.epochs):
-                batch: list[Datapoint] = self.storage.GetRandomBatch(config.batch_size)
-                for datapoint in batch:
-                    out = self.modelAdapter.Run(datapoint)
-                    self.modelAdapter.ApplyLoss(out, datapoint)
-                    errorCollector.AddError(out, datapoint.labels)
-                self.modelAdapter.BatchApplyLoss()
-                errorCollector.Archive()
-                if config.display_error and i + j*50 % config.train_display_interval == 0:
-                    errorCollector.DisplayCurrentError(i+ j*50)
+        for i in range(self.epochs):
+            for datapoint in self.storage.GetRandomBatch(config.batch_size):
+                out = self.modelAdapter.Run(datapoint)
+                self.modelAdapter.ApplyLoss(out, datapoint)
+                errorCollector.AddError(out, datapoint.labels)
+            self.modelAdapter.BatchApplyLoss()
+            errorCollector.Archive()
+            if config.display_error and i % config.train_display_interval == 0:
+                errorCollector.DisplayCurrentError(i)
         errorCollector.DisplayCurrentError(self.epochs)
-        #errorCollector.DisplayErrorGraph()
+        # errorCollector.DisplayErrorGraph()
 
     def EvaluateModel(self):
         datapoints = self.storage.GetAll()

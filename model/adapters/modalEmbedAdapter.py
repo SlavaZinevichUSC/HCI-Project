@@ -16,9 +16,10 @@ from model.tools.modelResults import ModelResults
 
 
 class ModalEmbedAdapter(AdapterBase):  # Ended up unnecessary as all networks have the same API
-    def __init__(self, size_in, modality: str | None = None):
+    def __init__(self, size_in, modality):
         super(ModalEmbedAdapter, self).__init__()
-        self.biasNet = BiasMitigationNet(size_in, c.size_embed_hidden, size_in)
+        size_embed_hidden = c.size_embed_hidden_visual if modality == 'visual' else c.size_embed_hidden_acoustic
+        self.biasNet = BiasMitigationNet(size_in, size_embed_hidden, size_in)
         self.temporalNet = TemporalNet(size_in, c.size_hidden, c.gru_num_layers, c.num_labels)
         self.loss_fn = EngineTools.GetLoss()
         self.net = torch.nn.Sequential(self.biasNet, self.temporalNet)
@@ -40,8 +41,8 @@ class ModalEmbedAdapter(AdapterBase):  # Ended up unnecessary as all networks ha
         return acoustic
 
     def Run(self, datapoint: Datapoint) -> ModelResults:
-        #embed = self.biasNet(self.GetInput(datapoint))
-        #temporal = self.temporalNet(embed)
+        # embed = self.biasNet(self.GetInput(datapoint))
+        # temporal = self.temporalNet(embed)
         temporal = self.net(self.GetInput(datapoint))
         return ModelResults(temporal)
 

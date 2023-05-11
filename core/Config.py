@@ -10,14 +10,15 @@ class Config:
     pooling_num_acoustic: int = 3
     lossFn: str = 'ce'  # only cross entropy is available
     optimizer: str = 'adam'  # only one option because let's be honest adam is all that's used
-    optimizer_lr: float = 0.01
-    epochs: int = 50
-    batch_size: int = 350
+    optimizer_lr: float = 0.002
+    epochs: int = 150
+    batch_size: int = 100
     size_visual: int = 2048  # can probably make these dynamic but who gives a damn
     size_lexical: int = 768
     size_acoustic: int = 128
     size_hidden: int = 128
-    size_embed_hidden: int = 128
+    size_embed_hidden_acoustic: int = 128
+    size_embed_hidden_visual: int = 512
     num_debias_layers: int = 2
     gru_num_layers: int = 2
     dropout_prob: float = 0.15
@@ -25,19 +26,19 @@ class Config:
     rolling_num: int = 3
     late_predictor: str = 'w_mean'  # options available at model.nets.LateFusionNet
     late_weighted_visual: float = 0.2
-    late_weighted_acoustic: float = 0.3
+    late_weighted_acoustic: float = 0.8
     late_weighted_lexical: float = 0.5
     modality: str = 'multi'  # options are multi, visual, acoustic, lexical
     display_confusion: bool = False
     display_error: bool = True
     display_bias: bool = True
     train_display_interval: int = 10
-    adapter: str = 'embed_acoustic'  # if multi don't forget to change 'modality'. its bad programming but oh well
+    adapter: str = 'multi_bias'  # if multi don't forget to change 'modality'. its bad programming but oh well
     # modes: 'acoustic_bias','visual_bias','multi_bias'
     # 'basic_acoustic', 'basic_visual', 'multi_basic'
     # 'embed_acoustic', 'embed_visual', 'multi_embed'
-    bias_weight: float = 0.02  # technically should normalize
-    test_set: str = 'iemocap'
+    bias_weight: float = 0.015  # technically should normalize
+    test_set: str = 'sewa'
     testing_bias: str = 'gender' if test_set == 'iemocap' else 'race'
     num_labels = 4 if test_set == 'iemocap' else 2 #Might be edited by SEWA label generator
     num_bias_labels = 2 if test_set == 'iemocap' else 6

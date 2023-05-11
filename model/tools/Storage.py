@@ -27,7 +27,7 @@ class Storage:
 # A more sophisticated system would involve cache based on RAM size but who cares
 class TinyStorage(Storage):
     def __init__(self, metadata: Metadata):
-        Storage.__init__(metadata)
+        Storage.__init__(self,metadata)
 
     def Get(self, indexes):
         entries = self.metadata.AsEntries(indexes)
